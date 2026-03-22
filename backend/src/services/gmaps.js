@@ -2,7 +2,6 @@
 // Key is read from environment - never hardcoded, never logged.
 
 const PLACES_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
-const EMBED_BASE = 'https://www.google.com/maps/embed/v1/place'
 
 export async function searchPlace(query, location = '') {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
@@ -26,13 +25,11 @@ export async function searchPlace(query, location = '') {
   const { lat, lng } = place.geometry.location
   const placeId = place.place_id
 
-  const mapsEmbedUrl = `${EMBED_BASE}?key=${apiKey}&q=place_id:${placeId}`
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${placeId}`
 
   return {
     place_name: place.name,
     address: place.formatted_address,
-    maps_embed_url: mapsEmbedUrl,
     maps_link: mapsLink,
     lat,
     lng

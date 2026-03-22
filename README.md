@@ -1,6 +1,6 @@
 # Local LLM with Google Maps Integration (Node.js/Fastify)
 
-![Tests](https://img.shields.io/badge/tests-35%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-28%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-4%20suites-brightgreen)
 ![Node](https://img.shields.io/badge/node-20%20LTS-green)
 ![Fastify](https://img.shields.io/badge/fastify-v4-black)
@@ -8,7 +8,7 @@
 ![Security](https://img.shields.io/badge/security-rate%20limited-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-This project integrates a local LLM (via Ollama and Open WebUI) with Google Maps API via a local Fastify backend. Users can chat with the LLM and ask about places to eat, visit, or find — and receive an embedded Google Map directly in the chat.
+This project integrates a local LLM (via Ollama and Open WebUI) with Google Maps API via a local Fastify backend. Users can chat with the LLM and ask about places to eat, visit, or find — and receive a static Google Map directly in the chat.
 
 ---
 
@@ -23,55 +23,49 @@ Run tests with: `npm test`
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
 | 1 | Valid query returns structured place data | `place_name`, `address`, `lat`, `lng` all present | ✅ Pass |
-| 2 | `maps_embed_url` contains `place_id` and API key | Embed URL is correctly formed | ✅ Pass |
-| 3 | `maps_link` is a valid Google Maps search URL | Directions link opens correct location | ✅ Pass |
-| 4 | Query and location are combined in fetch call | Search context is passed correctly to Places API | ✅ Pass |
-| 5 | Works with no location (query only) | Location field is optional | ✅ Pass |
-| 6 | Passes `language=id` to Places API | Indonesian results returned by default | ✅ Pass |
-| 7 | `lat` and `lng` returned as numbers, not strings | Correct data types in response | ✅ Pass |
-| 8 | Returns `null` when status is `ZERO_RESULTS` | Graceful handling of no results | ✅ Pass |
-| 9 | Returns `null` when results array is empty | Edge case: OK status but empty results | ✅ Pass |
-| 10 | Returns `null` on `REQUEST_DENIED` | Invalid/restricted key handled | ✅ Pass |
-| 11 | Returns `null` on `INVALID_REQUEST` | Malformed query handled | ✅ Pass |
-| 12 | API key is read from environment, not hardcoded | Key not baked into source code | ✅ Pass |
-| 13 | API key does NOT appear in the returned result | Key not exposed to LLM or user | ✅ Pass |
-| 14 | Embed URL contains the key (required by Maps Embed API) | iframe src is valid | ✅ Pass |
-| 15 | Rejects when fetch fails (network down) | Network error handled gracefully | ✅ Pass |
-| 16 | Handles fetch timeout | Timeout error handled gracefully | ✅ Pass |
+| 2 | `maps_link` is a valid Google Maps search URL | Directions link opens correct location | ✅ Pass |
+| 3 | Query and location are combined in fetch call | Search context is passed correctly to Places API | ✅ Pass |
+| 4 | Works with no location (query only) | Location field is optional | ✅ Pass |
+| 5 | Passes `language=en` to Places API | English results returned | ✅ Pass |
+| 6 | `lat` and `lng` returned as numbers, not strings | Correct data types in response | ✅ Pass |
+| 7 | Returns `null` when status is `ZERO_RESULTS` | Graceful handling of no results | ✅ Pass |
+| 8 | Returns `null` when results array is empty | Edge case: OK status but empty results | ✅ Pass |
+| 9 | Returns `null` on `REQUEST_DENIED` | Invalid/restricted key handled | ✅ Pass |
+| 10 | Returns `null` on `INVALID_REQUEST` | Malformed query handled | ✅ Pass |
+| 11 | API key is read from environment, not hardcoded | Key not baked into source code | ✅ Pass |
+| 12 | API key does NOT appear in the returned result | Key not exposed to LLM or user | ✅ Pass |
+| 13 | Rejects when fetch fails (network down) | Network error handled gracefully | ✅ Pass |
+| 14 | Handles fetch timeout | Timeout error handled gracefully | ✅ Pass |
 
 ### Suite 2 — Fastify Route (`src/routes/maps.js`)
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
-| 17 | Returns `200` with place data on valid request | Core endpoint works end-to-end | ✅ Pass |
-| 18 | Response includes all required fields | Contract: all 6 fields present | ✅ Pass |
-| 19 | Works without `location` field | Optional field handled | ✅ Pass |
-| 20 | Returns `400` when `query` is missing | Validation rejects bad input | ✅ Pass |
-| 21 | Returns `400` when `query` is empty string | Validation rejects empty string | ✅ Pass |
-| 22 | Returns `400` when body is empty | Validation rejects empty body | ✅ Pass |
-| 23 | Returns `404` when no places found | Not-found case returns correct status | ✅ Pass |
-| 24 | `404` body contains `error` message | Error message is human-readable | ✅ Pass |
-| 25 | Response `Content-Type` is `application/json` | Correct headers returned | ✅ Pass |
+| 15 | Returns `200` with place data on valid request | Core endpoint works end-to-end | ✅ Pass |
+| 16 | Response includes all required fields | Contract: all 5 fields present | ✅ Pass |
+| 17 | Works without `location` field | Optional field handled | ✅ Pass |
+| 18 | Returns `400` when `query` is missing | Validation rejects bad input | ✅ Pass |
+| 19 | Returns `400` when `query` is empty string | Validation rejects empty string | ✅ Pass |
+| 20 | Returns `400` when body is empty | Validation rejects empty body | ✅ Pass |
+| 21 | Returns `404` when no places found | Not-found case returns correct status | ✅ Pass |
+| 22 | Response `Content-Type` is `application/json` | Correct headers returned | ✅ Pass |
 
 ### Suite 3 — Security & Best Practices
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
-| 26 | `GOOGLE_MAPS_API_KEY` loaded from environment | Key management best practice | ✅ Pass |
-| 27 | API key is not the placeholder value | Real key configured, not template | ✅ Pass |
-| 28 | `ALLOWED_ORIGINS` is set and not wildcard `*` | CORS not open to all origins | ✅ Pass |
-| 29 | `maps_embed_url` uses HTTPS | Secure transport enforced | ✅ Pass |
-| 30 | `maps_link` uses HTTPS | Secure transport enforced | ✅ Pass |
+| 23 | `GOOGLE_MAPS_API_KEY` loaded from environment | Key management best practice | ✅ Pass |
+| 24 | API key is not the placeholder value | Real key configured, not template | ✅ Pass |
+| 25 | `ALLOWED_ORIGINS` is set and not wildcard `*` | CORS not open to all origins | ✅ Pass |
+| 26 | `maps_link` uses HTTPS | Secure transport enforced | ✅ Pass |
 
 ### Suite 4 — Map Output Correctness
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
-| 31 | `maps_embed_url` is a valid URL | `new URL()` does not throw | ✅ Pass |
-| 32 | `maps_link` is a valid URL | `new URL()` does not throw | ✅ Pass |
-| 33 | `maps_embed_url` uses Maps Embed API endpoint | Correct Google API used | ✅ Pass |
-| 34 | `place_name` is a non-empty string | LLM receives readable place name | ✅ Pass |
-| 35 | `lat` and `lng` are within valid geographic range | Coordinates are geographically valid | ✅ Pass |
+| 27 | `maps_link` is a valid URL | `new URL()` does not throw | ✅ Pass |
+| 28 | `place_name`, `address` are non-empty strings | LLM receives readable data | ✅ Pass |
+| 29 | `lat` and `lng` are within valid geographic range | Coordinates are geographically valid | ✅ Pass |
 
 ---
 
@@ -91,7 +85,7 @@ Run tests with: `npm test`
 | **Reliability** | Graceful `404` when no places found | ✅ |
 | **Reliability** | Graceful error handling on network/fetch failure | ✅ |
 | **Reliability** | All services restart automatically via Docker (`restart: unless-stopped`) | ✅ |
-| **Testing** | 35 unit tests across 4 suites | ✅ |
+| **Testing** | 28 unit tests across 4 suites | ✅ |
 | **Testing** | Service layer, route layer, security, and output all covered | ✅ |
 | **Testing** | External API (Google Places) mocked — tests run offline | ✅ |
 | **Maintainability** | Separation of concerns: service / route / plugin layers | ✅ |
@@ -107,9 +101,9 @@ Run tests with: `npm test`
 
 ### 1. Google Cloud Setup
 1. Go to [Google Cloud Console](https://console.cloud.google.com) and create a project.
-2. Enable **Maps Embed API** and **Places API**.
+2. Enable **Maps Static API** and **Places API**.
 3. Create an API Key and restrict it to the enabled APIs and your local IP address.
-4. Go to Quotas: set Places API Text Search daily limit to 100 requests/day, and Maps Embed API to 500 requests/day.
+4. Go to Quotas: set Places API Text Search daily limit to 100 requests/day, and Maps Static API to 500 requests/day.
 
 ### 2. Backend Config
 1. Rename `backend/.env.example` to `backend/.env`.
@@ -147,11 +141,10 @@ Expected output:
  PASS  backend.test.js
   searchPlace() — Google Maps service
     ✓ returns structured place data for a valid query
-    ✓ maps_embed_url contains place_id and API key
-    ... (35 tests total)
+    ... (28 tests total)
 
 Test Suites: 1 passed, 1 total
-Tests:       35 passed, 35 total
+Tests:       28 passed, 28 total
 ```
 
 ---

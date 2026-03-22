@@ -123,7 +123,6 @@ export default async function mapsRoute(fastify) {
         properties: {
           place_name: { type: 'string' },
           address: { type: 'string' },
-          maps_embed_url: { type: 'string' },
           maps_link: { type: 'string' },
           lat: { type: 'number' },
           lng: { type: 'number' }
@@ -185,7 +184,6 @@ export async function searchPlace(query, location = '') {
   return {
     place_name: place.name,
     address: place.formatted_address,
-    maps_embed_url: mapsEmbedUrl,
     maps_link: mapsLink,
     lat,
     lng
@@ -469,7 +467,6 @@ These are mandatory - the reviewer will check for these:
 |-------|------|-------------|
 | `place_name` | string | Name from Google Places |
 | `address` | string | Formatted address |
-| `maps_embed_url` | string | URL for `<iframe src="">` |
 | `maps_link` | string | Clickable Google Maps URL |
 | `lat` | number | Latitude |
 | `lng` | number | Longitude |

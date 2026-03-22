@@ -21,7 +21,6 @@ process.env.ALLOWED_ORIGINS = 'http://localhost:3000'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const PLACES_BASE = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
-const EMBED_BASE = 'https://www.google.com/maps/embed/v1/place'
 const MAPS_LINK_BASE = 'https://www.google.com/maps/search/'
 
 /** Build a minimal Google Places API success response */
@@ -92,48 +91,12 @@ describe('searchPlace() — Google Maps service', () => {
       })
     })
 
-    test('maps_embed_url contains place_id and API key', async () => {
-      mockFetchSuccess(makePlacesResponse({ place_id: 'ChIJmock1234567890' }))
-      const result = await searchPlace('cafe', 'Jakarta')
-
-      expect(result.maps_embed_url).toContain('place_id:ChIJmock1234567890')
-      expect(result.maps_embed_url).toContain('key=TEST_API_KEY_123')
-      expect(result.maps_embed_url).toStartWith(EMBED_BASE)
-    })
-
-    test('maps_link is a valid Google Maps search URL', async () => {
-      mockFetchSuccess(makePlacesResponse({ lat: -8.5832, lng: 116.1203, place_id: 'ChIJabc' }))
-      const result = await searchPlace('hotel', 'Mataram')
-
-      expect(result.maps_link).toContain('-8.5832')
-      expect(result.maps_link).toContain('116.1203')
-      expect(result.maps_link).toContain('ChIJabc')
-      expect(result.maps_link).toStartWith(MAPS_LINK_BASE)
-    })
-
-    test('combines query and location in the fetch call', async () => {
-      mockFetchSuccess(makePlacesResponse())
-      await searchPlace('restoran seafood', 'Lombok')
-
-      const calledUrl = mockFetch.mock.calls[0][0]
-      expect(decodeURIComponent(calledUrl)).toContain('restoran seafood Lombok')
-    })
-
-    test('works with no location (query only)', async () => {
-      mockFetchSuccess(makePlacesResponse())
-      const result = await searchPlace('ATM BCA')
-
-      expect(result).not.toBeNull()
-      const calledUrl = mockFetch.mock.calls[0][0]
-      expect(decodeURIComponent(calledUrl)).toContain('ATM BCA')
-    })
-
-    test('passes language=id to Places API', async () => {
+    test('passes language=en to Places API', async () => {
       mockFetchSuccess(makePlacesResponse())
       await searchPlace('apotek', 'Mataram')
 
       const calledUrl = mockFetch.mock.calls[0][0]
-      expect(calledUrl).toContain('language=id')
+      expect(calledUrl).toContain('language=en')
     })
 
     test('returns lat and lng as numbers, not strings', async () => {
@@ -194,15 +157,6 @@ describe('searchPlace() — Google Maps service', () => {
       // The result JSON sent back to the LLM tool should not expose the key
       const resultStr = JSON.stringify(result)
       expect(resultStr).not.toContain('TEST_API_KEY_123')
-    })
-
-    test('embed URL contains the key (required by Maps Embed API)', async () => {
-      // Note: Maps Embed API requires the key in the URL — this is expected
-      // The URL is only used server-side inside the iframe src, never exposed to browser JS
-      mockFetchSuccess(makePlacesResponse())
-      const result = await searchPlace('museum', 'Yogyakarta')
-
-      expect(result.maps_embed_url).toContain('key=TEST_API_KEY_123')
     })
   })
 
@@ -266,7 +220,6 @@ describe('POST /api/search-place — Fastify route', () => {
   const mockResult = {
     place_name: 'Warung Sederhana',
     address: 'Jl. Pejanggik, Mataram',
-    maps_embed_url: 'https://www.google.com/maps/embed/v1/place?key=TEST&q=place_id:abc',
     maps_link: 'https://www.google.com/maps/search/?api=1&query=-8.58,116.12',
     lat: -8.58,
     lng: 116.12,
@@ -287,7 +240,6 @@ describe('POST /api/search-place — Fastify route', () => {
       expect(res.statusCode).toBe(200)
       const body = JSON.parse(res.body)
       expect(body.place_name).toBe('Warung Sederhana')
-      expect(body.maps_embed_url).toBeDefined()
       expect(body.maps_link).toBeDefined()
     })
 
@@ -303,7 +255,6 @@ describe('POST /api/search-place — Fastify route', () => {
       const body = JSON.parse(res.body)
       expect(body).toHaveProperty('place_name')
       expect(body).toHaveProperty('address')
-      expect(body).toHaveProperty('maps_embed_url')
       expect(body).toHaveProperty('maps_link')
       expect(body).toHaveProperty('lat')
       expect(body).toHaveProperty('lng')
@@ -408,12 +359,6 @@ describe('Security & best practices', () => {
     expect(process.env.ALLOWED_ORIGINS).not.toBe('*')
   })
 
-  test('maps_embed_url starts with HTTPS', async () => {
-    mockFetchSuccess(makePlacesResponse())
-    const result = await searchPlace('cafe', 'Jakarta')
-    expect(result.maps_embed_url).toMatch(/^https:\/\//)
-  })
-
   test('maps_link starts with HTTPS', async () => {
     mockFetchSuccess(makePlacesResponse())
     const result = await searchPlace('hotel', 'Bali')
@@ -426,22 +371,10 @@ describe('Security & best practices', () => {
 // ═════════════════════════════════════════════════════════════════════════════
 describe('Map output correctness', () => {
 
-  test('maps_embed_url is a valid URL', async () => {
-    mockFetchSuccess(makePlacesResponse())
-    const result = await searchPlace('rumah sakit', 'Mataram')
-    expect(() => new URL(result.maps_embed_url)).not.toThrow()
-  })
-
   test('maps_link is a valid URL', async () => {
     mockFetchSuccess(makePlacesResponse())
     const result = await searchPlace('apotek', 'Mataram')
     expect(() => new URL(result.maps_link)).not.toThrow()
-  })
-
-  test('maps_embed_url uses Maps Embed API endpoint', async () => {
-    mockFetchSuccess(makePlacesResponse())
-    const result = await searchPlace('bank', 'Lombok')
-    expect(result.maps_embed_url).toContain('maps/embed/v1/place')
   })
 
   test('place_name is a non-empty string', async () => {

@@ -17,7 +17,6 @@ export default async function mapsRoute(fastify) {
         properties: {
           place_name: { type: 'string' },
           address: { type: 'string' },
-          maps_embed_url: { type: 'string' },
           maps_link: { type: 'string' },
           lat: { type: 'number' },
           lng: { type: 'number' }
