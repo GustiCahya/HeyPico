@@ -1,7 +1,7 @@
 # Project Spec: Local LLM with Google Maps Integration
 
-**Version:** 1.1  
-**Stack:** JavaScript (Node.js + Fastify) · Ollama · Open WebUI · Google Maps API  
+**Version:** 1.2  
+**Stack:** JavaScript (Node.js + Fastify) · Ollama · Open WebUI · Google Maps API (Static Maps API)  
 **Target:** AI agent implementation guide - read this fully before writing any code.
 
 ---
@@ -165,7 +165,7 @@ export async function searchPlace(query, location = '') {
   const params = new URLSearchParams({
     query: searchQuery,
     key: apiKey,
-    language: 'id'    // Indonesian results - change to 'en' if needed
+    language: 'en' 
   })
 
   const response = await fetch(`${PLACES_URL}?${params}`)
@@ -254,9 +254,9 @@ CMD ["node", "src/server.js"]
 ```python
 """
 title: Google Maps Place Search
-author: your_name
-description: Search for places and return an embeddable Google Maps iframe
-version: 0.1.0
+author: Gusti
+description: Search for places and return a static map image with directions link
+version: 0.2.0
 """
 
 import requests
@@ -265,17 +265,18 @@ from pydantic import BaseModel
 class Tools:
     class Valves(BaseModel):
         BACKEND_URL: str = "http://backend:8000"  # Docker service name
+        GOOGLE_MAPS_API_KEY: str = ""
 
     def __init__(self):
         self.valves = self.Valves()
 
     def search_place(self, query: str, location: str = "") -> str:
         """
-        Search for a place and return a Google Maps embed.
+        Search for a place and return a static Google Maps image with directions link.
         Use this when the user asks about places to go, eat, visit, or find.
         :param query: The place type or name to search for
         :param location: Optional city or area to narrow the search
-        :return: Markdown string with embedded map and directions link
+        :return: Markdown string with static map image and directions link
         """
         try:
             response = requests.post(
@@ -288,21 +289,28 @@ class Tools:
             if response.status_code != 200:
                 return f"Sorry, I couldn't find that place: {data.get('error', 'Unknown error')}"
 
-            return f"""
-**{data['place_name']}**
-{data['address']}
+            lat = data['lat']
+            lng = data['lng']
+            place_name = data['place_name']
+            address = data['address']
+            maps_link = data['maps_link']
+            directions_link = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lng}"
 
-<iframe
-  width="100%"
-  height="300"
-  style="border:0; border-radius:8px;"
-  loading="lazy"
-  allowfullscreen
-  src="{data['maps_embed_url']}">
-</iframe>
+            static_map = (
+                f"https://maps.googleapis.com/maps/api/staticmap"
+                f"?center={lat},{lng}"
+                f"&zoom=15"
+                f"&size=600x300"
+                f"&markers=color:red%7Clabel:P%7C{lat},{lng}"
+                f"&key={self.valves.GOOGLE_MAPS_API_KEY}"
+            )
 
-[Open in Google Maps]({data['maps_link']})
-""".strip()
+            return f"""**{place_name}**
+{address}
+
+[![Map of {place_name}]({static_map})]({maps_link})
+
+[Open in Google Maps]({maps_link}) | [Get Directions]({directions_link})""".strip()
 
         except Exception as e:
             return f"Map search failed: {str(e)}"
@@ -323,7 +331,7 @@ Paste this into Open WebUI → Settings → Models → (your model) → System P
 ```
 You are a helpful local assistant. When users ask about places - such as restaurants,
 cafes, hotels, ATMs, hospitals, or any location - you MUST use the search_place tool
-to find the location and display the map.
+to find the location and display the map. But please do not say "search_place" in front of user, just say google map place search tool.
 
 Rules:
 - Always use search_place for any question about where to find something
@@ -408,6 +416,7 @@ volumes:
 2. **Create new project** - name it `llm-maps-project`
 3. **Enable APIs** (APIs & Services → Library → search and enable each):
    - Maps Embed API
+   - Maps Static API
    - Places API
 4. **Create API Key** (APIs & Services → Credentials → Create Credentials → API Key)
 5. **Restrict the API key** - CRITICAL:
@@ -558,7 +567,7 @@ Write these in `docs/ASSUMPTIONS.md`:
 4. The backend runs locally only - no public-facing deployment
 5. `location` is optional - if omitted, Google Places searches globally
 6. Tool calling works reliably with `llama3.1:8b` - smaller or older models may need prompt adjustment
-7. Places API language is set to `id` (Indonesian) - update to `en` for English results
+7. Places API language is set to `en` (English)
 8. Node.js native `fetch` is used (requires Node 18+) - no need for `axios`
 
 ---

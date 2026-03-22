@@ -12,7 +12,7 @@ export async function searchPlace(query, location = '') {
   const params = new URLSearchParams({
     query: searchQuery,
     key: apiKey,
-    language: 'id'    // Indonesian results - change to 'en' if needed
+    language: 'en' 
   })
 
   const response = await fetch(`${PLACES_URL}?${params}`)

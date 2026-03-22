@@ -6,5 +6,5 @@
 4. The backend runs locally only - no public-facing deployment
 5. `location` is optional - if omitted, Google Places searches globally
 6. Tool calling works reliably with `llama3.1:8b` - smaller or older models may need prompt adjustment
-7. Places API language is set to `id` (Indonesian) - update to `en` for English results
+7. Places API language is set to `en` (English)
 8. Node.js native `fetch` is used (requires Node 18+) - no need for `axios`
