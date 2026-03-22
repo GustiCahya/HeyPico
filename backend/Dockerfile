@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY src/ ./src/
 EXPOSE 8000
-CMD ["node", "src/server.js"]
+CMD ["node", "--watch", "src/server.js"]

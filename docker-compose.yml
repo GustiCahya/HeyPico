@@ -23,6 +23,8 @@ services:
 
   backend:
     build: ./backend
+    volumes:
+      - ./backend/src:/app/src
     container_name: maps-backend
     env_file:
       - ./backend/.env
