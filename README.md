@@ -8,7 +8,11 @@
 ![Security](https://img.shields.io/badge/security-rate%20limited-orange)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-This project integrates a local LLM (via Ollama and Open WebUI) with Google Maps API via a local Fastify backend. Users can chat with the LLM and ask about places to eat, visit, or find — and receive a static Google Map directly in the chat.
+This project integrates a local LLM (via Ollama and Open WebUI) with Google Maps API via a local Fastify backend. Users can chat with the LLM and ask about places to eat, visit, or find - and receive a static Google Map directly in the chat.
+
+## Demo
+
+https://github.com/user-attachments/assets/9c8c0220-67fb-4343-a2ee-6d4b9d139669
 
 ---
 
@@ -18,7 +22,7 @@ All critical backend functionality is covered by unit tests across 4 test suites
 
 Run tests with: `npm test`
 
-### Suite 1 — Google Maps Service (`src/services/gmaps.js`)
+### Suite 1 - Google Maps Service (`src/services/gmaps.js`)
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
@@ -37,7 +41,7 @@ Run tests with: `npm test`
 | 13 | Rejects when fetch fails (network down) | Network error handled gracefully | ✅ Pass |
 | 14 | Handles fetch timeout | Timeout error handled gracefully | ✅ Pass |
 
-### Suite 2 — Fastify Route (`src/routes/maps.js`)
+### Suite 2 - Fastify Route (`src/routes/maps.js`)
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
@@ -50,7 +54,7 @@ Run tests with: `npm test`
 | 21 | Returns `404` when no places found | Not-found case returns correct status | ✅ Pass |
 | 22 | Response `Content-Type` is `application/json` | Correct headers returned | ✅ Pass |
 
-### Suite 3 — Security & Best Practices
+### Suite 3 - Security & Best Practices
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
@@ -59,7 +63,7 @@ Run tests with: `npm test`
 | 25 | `ALLOWED_ORIGINS` is set and not wildcard `*` | CORS not open to all origins | ✅ Pass |
 | 26 | `maps_link` uses HTTPS | Secure transport enforced | ✅ Pass |
 
-### Suite 4 — Map Output Correctness
+### Suite 4 - Map Output Correctness
 
 | # | Test Case | What It Verifies | Status |
 |---|-----------|-----------------|--------|
@@ -87,13 +91,13 @@ Run tests with: `npm test`
 | **Reliability** | All services restart automatically via Docker (`restart: unless-stopped`) | ✅ |
 | **Testing** | 28 unit tests across 4 suites | ✅ |
 | **Testing** | Service layer, route layer, security, and output all covered | ✅ |
-| **Testing** | External API (Google Places) mocked — tests run offline | ✅ |
+| **Testing** | External API (Google Places) mocked - tests run offline | ✅ |
 | **Maintainability** | Separation of concerns: service / route / plugin layers | ✅ |
 | **Maintainability** | `.env.example` committed as configuration template | ✅ |
 | **Maintainability** | `npm ci` used in Dockerfile for reproducible builds | ✅ |
 | **Maintainability** | `node_modules/` excluded from Git | ✅ |
 | **Portability** | Full Docker Compose setup (Ollama + Open WebUI + backend) | ✅ |
-| **Portability** | Native `fetch` used — no unnecessary dependencies | ✅ |
+| **Portability** | Native `fetch` used - no unnecessary dependencies | ✅ |
 
 ---
 
@@ -124,7 +128,8 @@ Run tests with: `npm test`
 1. Open [http://localhost:3000](http://localhost:3000) and register an admin account.
 2. Go to **Settings → Tools**: add a new tool using the contents of `openwebui/tools/maps_tool.py`.
 3. Go to **Settings → Models → Edit Model → System Prompt**: paste the contents of `openwebui/prompts/system.md`.
-4. Chat with the LLM and ask about a location!
+4. Include GOOGLE_MAPS_API_KEY in the valve of the maps tool
+5. Chat with the LLM and ask about a location!
 
 ---
 
@@ -139,7 +144,7 @@ npm test
 Expected output:
 ```
  PASS  backend.test.js
-  searchPlace() — Google Maps service
+  searchPlace() - Google Maps service
     ✓ returns structured place data for a valid query
     ... (28 tests total)
 

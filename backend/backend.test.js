@@ -1,5 +1,5 @@
 /**
- * Unit Tests — Local LLM with Google Maps Integration
+ * Unit Tests - Local LLM with Google Maps Integration
  * Backend: Node.js + Fastify
  *
  * Run with:  node --experimental-vm-modules node_modules/.bin/jest
@@ -74,7 +74,7 @@ beforeEach(() => {
 // ═════════════════════════════════════════════════════════════════════════════
 // 1. GOOGLE MAPS SERVICE  (src/services/gmaps.js)
 // ═════════════════════════════════════════════════════════════════════════════
-describe('searchPlace() — Google Maps service', () => {
+describe('searchPlace() - Google Maps service', () => {
 
   // ── 1.1  Happy path ────────────────────────────────────────────────────────
   describe('happy path', () => {
@@ -178,7 +178,7 @@ describe('searchPlace() — Google Maps service', () => {
 // ═════════════════════════════════════════════════════════════════════════════
 // 2. FASTIFY ROUTE  (src/routes/maps.js)
 // ═════════════════════════════════════════════════════════════════════════════
-describe('POST /api/search-place — Fastify route', () => {
+describe('POST /api/search-place - Fastify route', () => {
 
   let app
 
@@ -367,7 +367,7 @@ describe('Security & best practices', () => {
 })
 
 // ═════════════════════════════════════════════════════════════════════════════
-// 4. MAPS OUTPUT — what the LLM returns to the user
+// 4. MAPS OUTPUT - what the LLM returns to the user
 // ═════════════════════════════════════════════════════════════════════════════
 describe('Map output correctness', () => {
 
